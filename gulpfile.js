@@ -71,9 +71,9 @@ gulp.task('test', ['browserify-test'], function() {
 gulp.task('watch', function() {
   gulp.watch(paths.scripts, ['browserify']);
   gulp.watch(paths.sass, ['sass']);
-  gulp.watch(paths.tests, ['browserify-test']);
+  gulp.watch(paths.tests, ['browserify-test', 'test']);
 });
 
-gulp.task('default', ['watch', 'sass', 'browserify', 'browserify-test']);
+gulp.task('default', ['watch', 'sass', 'browserify', 'test']);
   
   
