@@ -1,18 +1,20 @@
-var args            = require('yargs').argv;
-var autoprefixer    = require('gulp-autoprefixer');
-var browserify      = require('browserify');
-var es              = require('event-stream');
-var glob            = require('glob');
-var gulp            = require('gulp');
-var gulpif          = require('gulp-if');
-var gutil           = require('gulp-util');
-var jshint          = require('gulp-jshint');
-var minifyCSS       = require('gulp-minify-css');
-var mochaPhantomjs  = require('gulp-mocha-phantomjs');
-var rename          = require('gulp-rename');
-var sass            = require('gulp-sass');
-var source          = require('vinyl-source-stream');
-var uglify          = require ('gulp-uglify');
+var args            = require('yargs').argv,
+    autoprefixer    = require('gulp-autoprefixer'),
+    bower           = require('gulp-bower'),
+    browserify      = require('browserify'),
+    es              = require('event-stream'),
+    glob            = require('glob'),
+    gulp            = require('gulp'),
+    gulpif          = require('gulp-if'),
+    gutil           = require('gulp-util'),
+    jshint          = require('gulp-jshint'),
+    minifyCSS       = require('gulp-minify-css'),
+    mochaPhantomjs  = require('gulp-mocha-phantomjs'),
+    rename          = require('gulp-rename'),
+    sass            = require('gulp-sass'),
+    source          = require('vinyl-source-stream'),
+    uglify          = require ('gulp-uglify');
+
 
 var sass_entry_paths = [
   'components/sass/public.scss',
@@ -20,6 +22,7 @@ var sass_entry_paths = [
 ];
 
 var paths = {
+  bowerDir: './bower_components',
   scripts: 'components/scripts/**/*.js',
   sass: 'components/sass/**/*.scss',
   tests: 'tests/scripts/*.js'
@@ -27,15 +30,32 @@ var paths = {
 
 var isProduction = args.env === 'production';
 
+gulp.task('bower', function() {
+    return bower()
+        .pipe(gulp.dest(paths.bowerDir))
+});
+
+gulp.task('icons', function() {
+    return gulp.src(paths.bowerDir + '/font-awesome/fonts/**.*')
+        .pipe(gulp.dest('./public/fonts'));
+});
+
 gulp.task('sass', function() {
     return gulp.src(sass_entry_paths, { base: '.' })
-        .pipe(sass({errLogToConsole: true}))
+        .pipe(sass({
+          errLogToConsole: true,
+          includePaths: [
+              './components/sass',
+              paths.bowerDir + '/bootstrap-sass/assets/stylesheets',
+              paths.bowerDir + '/font-awesome/scss',
+          ]      
+        }))
         .pipe(autoprefixer('last 2 version'))
         .pipe(rename(function(path) {
             path.dirname = 'public/css';
             path.extname = '.min.css';
         }))
-        .pipe(gulp.dest('./dist/')); 
+        .pipe(gulp.dest('./')); 
 });
 
 gulp.task('browserify', function(done) {
@@ -50,7 +70,7 @@ gulp.task('browserify', function(done) {
           dirname: 'public/js',
           extname: '.min.js'
       }))
-      .pipe(gulp.dest('./dist/'));
+      .pipe(gulp.dest('./'));
     });
     es.merge(tasks).on('end', done);
   });
@@ -74,6 +94,6 @@ gulp.task('watch', function() {
   gulp.watch(paths.tests, ['browserify-test', 'test']);
 });
 
-gulp.task('default', ['watch', 'sass', 'browserify', 'test']);
+gulp.task('default', ['bower', 'icons', 'watch', 'sass', 'browserify', 'test']);
   
   
