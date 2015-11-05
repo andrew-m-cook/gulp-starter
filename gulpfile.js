@@ -1,6 +1,5 @@
 var args            = require('yargs').argv,
     autoprefixer    = require('gulp-autoprefixer'),
-    bower           = require('gulp-bower'),
     browserify      = require('browserify'),
     es              = require('event-stream'),
     glob            = require('glob'),
@@ -22,7 +21,7 @@ var sass_entry_paths = [
 ];
 
 var paths = {
-  bowerDir: './bower_components',
+  bootstrapDir: './node_modules/bootstrap-sass/assets',
   scripts: 'components/scripts/**/*.js',
   sass: 'components/sass/**/*.scss',
   tests: 'tests/scripts/*.js'
@@ -30,13 +29,9 @@ var paths = {
 
 var isProduction = args.env === 'production';
 
-gulp.task('bower', function() {
-    return bower()
-        .pipe(gulp.dest(paths.bowerDir))
-});
 
 gulp.task('icons', function() {
-    return gulp.src(paths.bowerDir + '/font-awesome/fonts/**.*')
+    return gulp.src(paths.bootstrapDir + '/fonts/bootstrap/**.*')
         .pipe(gulp.dest('./public/fonts'));
 });
 
@@ -46,8 +41,7 @@ gulp.task('sass', function() {
           errLogToConsole: true,
           includePaths: [
               './components/sass',
-              paths.bowerDir + '/bootstrap-sass/assets/stylesheets',
-              paths.bowerDir + '/font-awesome/scss',
+              paths.bootstrapDir + '/stylesheets',
           ]      
         }))
         .pipe(autoprefixer('last 2 version'))
@@ -94,6 +88,6 @@ gulp.task('watch', function() {
   gulp.watch(paths.tests, ['browserify-test', 'test']);
 });
 
-gulp.task('default', ['bower', 'icons', 'watch', 'sass', 'browserify', 'test']);
+gulp.task('default', ['icons', 'watch', 'sass', 'browserify']);
   
   
